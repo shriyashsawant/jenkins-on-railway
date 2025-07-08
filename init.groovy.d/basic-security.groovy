@@ -5,12 +5,13 @@ import hudson.security.*
 
 def instance = Jenkins.getInstance()
 
-// Create local Jenkins user
+def user = 'shriyashsawant'
+def password = 'Shriyash@2004'
+
 def hudsonRealm = new HudsonPrivateSecurityRealm(false)
-hudsonRealm.createAccount("shriyashsawant", "Shriyash@2004")
+hudsonRealm.createAccount(user, password)
 instance.setSecurityRealm(hudsonRealm)
 
-// Authorization
 def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
 strategy.setAllowAnonymousRead(false)
 instance.setAuthorizationStrategy(strategy)
