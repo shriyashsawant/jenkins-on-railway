@@ -1,22 +1,18 @@
 FROM jenkins/jenkins:lts
 
-# Disable setup wizard
+# Disable the setup wizard
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 
-# Add plugins
+# Install required plugins
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
-# Add init script to auto-create admin
+# Copy your groovy admin initializer
 COPY init.groovy.d/ /usr/share/jenkins/ref/init.groovy.d/
 
-# -------------------------------
-# 🔧 Fix volume permission issue
-# -------------------------------
+# ✅ Fix permissions on the mounted volume
 USER root
-RUN mkdir -p /var/jenkins_home && chown -R jenkins:jenkins /var/jenkins_home
-
-# Switch back to jenkins user
+RUN chown -R 1000:1000 /var/jenkins_home
 USER jenkins
 
 EXPOSE 8080
