@@ -1,19 +1,25 @@
 FROM jenkins/jenkins:lts
 
-# Disable the setup wizard
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 
-# Install required plugins
+# Install plugins
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
-# Copy your groovy admin initializer
+# Copy admin auto-creation
 COPY init.groovy.d/ /usr/share/jenkins/ref/init.groovy.d/
 
-# ✅ Fix permissions on the mounted volume
+# ✅ Switch to root to fix volume permissions
 USER root
-RUN chown -R 1000:1000 /var/jenkins_home
-USER jenkins
+
+# 👇 Entrypoint script to fix perms at container start
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# ✅ Run as root at startup
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash", "-c", "/usr/bin/tini -- /usr/local/bin/jenkins.sh"]
 
 EXPOSE 8080
+
 
